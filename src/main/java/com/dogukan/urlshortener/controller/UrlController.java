@@ -1,16 +1,17 @@
 package com.dogukan.urlshortener.controller;
 
-import com.dogukan.urlshortener.entity.Url;
+import com.dogukan.urlshortener.dto.ShortenRequest;
+import com.dogukan.urlshortener.dto.UrlResponse;
 import com.dogukan.urlshortener.service.UrlService;
+import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.Map;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/api/v1/urls")
 public class UrlController {
 
     private final UrlService urlService;
@@ -20,11 +21,11 @@ public class UrlController {
     }
 
     @PostMapping("/shorten")
-    public ResponseEntity<Map<String, String>> shortenUrl(@RequestBody Map<String, String> request) {
-        String originalUrl = request.get("url");
-        String shortUrl = urlService.shortenUrl(originalUrl);
-        return ResponseEntity.ok(Map.of("shortUrl", shortUrl));
+    public ResponseEntity<UrlResponse> shortenUrl(@Valid @RequestBody ShortenRequest request) {
+        UrlResponse response = urlService.shortenUrl(request.getUrl());
+        return ResponseEntity.ok(response);
     }
+
 
     @GetMapping("/{shortCode}")
     public ResponseEntity<Void> redirectToOriginal(@PathVariable String shortCode) {
@@ -34,9 +35,8 @@ public class UrlController {
                 .build();
     }
 
-
-    @GetMapping("/urls/{shortCode}")
-    public ResponseEntity<Url> getUrlDetails(@PathVariable String shortCode) {
-        return ResponseEntity.ok(urlService.getUrlEntity(shortCode));
+    @GetMapping("/info/{shortCode}")
+    public ResponseEntity<UrlResponse> getUrlDetails(@PathVariable String shortCode) {
+        return ResponseEntity.ok(urlService.getUrlDetails(shortCode));
     }
 }
